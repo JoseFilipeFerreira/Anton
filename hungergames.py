@@ -29,9 +29,6 @@ class HungerGames(commands.Cog):
                       brief="change leaderboard channel")
     @commands.has_permissions(administrator=True)
     async def channel(self, ctx):
-        if ctx.message.author.id not in self.authorized_members:
-            return
-
         self.message_channel = ctx.message.channel.id
         await ctx.send("This is the new leaderboard channel")
         self.save_stats()
@@ -64,14 +61,17 @@ class HungerGames(commands.Cog):
                     cults[role.id] += self.member_stats.get(str(member.id), 0)
                     active_members[role.id] += 1 if str(member.id) in self.member_stats else 0
 
-        for id in sorted(cults, key=cults.__getitem__, reverse=True):
+        cult_list = list(cults.keys())
+        cult_list.sort(key=lambda id:cults[id]/active_members[id] if active_members[id] else 0, reverse=True)
+
+        for id in cults:
             role = ctx.message.guild.get_role(int(id))
             if role:
                 message += role.mention
                 message += ": "
                 message += str(cults[id])
                 message += " ("
-                message += str(math.ceil(cults[id]/active_members[id]))
+                message += str(math.ceil(cults[id]/active_members[id] if active_members[id] else 0))
                 message += ")\n"
             else:
                 print("Role", id, "not in the guild")
