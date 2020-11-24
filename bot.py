@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from os import path, listdir
 import asyncio 
 
 intents = discord.Intents.default()
@@ -13,6 +14,13 @@ bot = commands.Bot(
 
 def main():
     bot.STATS_PATH = "stats.json"
+
+    bot.mediaMap = {}
+    for f in listdir("media"):
+        if path.isfile(path.join("media", f)):
+            filename, _ = path.splitext(f)
+            bot.mediaMap[filename.lower()] = f
+
     bot.run(open('auth').readline().rstrip())
 
 @bot.event
@@ -39,7 +47,13 @@ async def on_ready():
 async def on_message(message):
     #send media
     if message.content.startswith(bot.command_prefix):
-        await bot.process_commands(message)
+        content = message.content.lower()[1:]
+        if content in bot.mediaMap:
+            await message.channel.send(
+                file = discord.File(
+                    "media/"+bot.mediaMap[content]))
+        else:
+            await bot.process_commands(message)
 
 def get_bot_color(bot):
     bGuild, color = 0, 0xffff00

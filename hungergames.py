@@ -11,6 +11,24 @@ class HungerGames(commands.Cog):
         self.member_stats = stats["members"]
         self.message_channel = stats["message_channel"]
 
+
+    @commands.command(name='images',
+        description="list all available Images",
+        brief="all available Images")
+    async def images(self, ctx):
+        embed=discord.Embed(
+            title="Image",
+            description="all photos",
+            color=self.bot.embed_color
+        )
+        array = []
+        for pic in self.bot.mediaMap:
+            array.append(pic)
+        array.sort()
+
+        embed.add_field(name="📸", value='\n'.join(array), inline=True)
+        await ctx.message.author.send(embed=embed)
+
     @commands.command(name='point',
                       description="give one point to a mentioned user",
                       brief="give point")
